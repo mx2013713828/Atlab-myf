@@ -46,7 +46,7 @@ def train_model(model, dataloaders, criterion, optimizer,start_epoch, num_epochs
     best_acc = 0.0
     epochnum = 1
     for epoch in range(start_epoch+1,num_epochs):
-	tep = time.time()
+	    tep = time.time()
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
         print('-' * 10)
 

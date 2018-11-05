@@ -1,7 +1,17 @@
 from util import TestDataset,initialize_model,eval_model
 
-import json
-list_file = 
+import os,json,argparse
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('list_file', type=str, help='list of test images')
+parser.add_argument('model', type=str, help='name or path to model')
+parser.add_argument('output', type=str, help='path to save results file')
+
+args = parser.parse_args()
+
+
+list_file = args.list_file
 transform=transforms.Compose([
                         transforms.RandomResizedCrop(224),
                         transforms.RandomHorizontalFlip(),
@@ -17,7 +27,10 @@ testloader = DataLoader(testset, batch_size=64,
 
 # model_name= 'densenet'
 feature_extract = False
+
+
 model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
+
 checkpoint = torch.load('densenet-blade-35.pt')
 state_dict = {}
 for key in checkpoint['model_state_dict'].keys():
@@ -26,4 +39,5 @@ model_ft.load_state_dict(state_dict)
 
 results = eval_model(model_ft,testloader)
 
-json.dump(results,'output-log.json')
+with open(args.output,'w') as f:
+    json.dump(results,f,indent=2)
