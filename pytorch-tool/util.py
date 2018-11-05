@@ -89,6 +89,89 @@ class TestDataset(Dataset):
 
         return sample
 
+class TrainDataset(Dataset):
+    def __init__(self,list_file,classes=None,transform=None):
+        """
+        Args:
+            csv_file (string): Path to the csv file with annotations.
+            root_dir (string): Directory with all the images.
+            transform (callable, optional): Optional transform to be applied
+                on a sample.
+        """
+#         self.landmarks_frame = pd.read_csv(csv_file)
+#         self.root_dir = root_dir
+        self.transform = transform
+#         self.transform_v2 = transform_v2
+        self.list_file = list_file
+        self.image_list = open(list_file).read().splitlines()
+        self.classes = classes
+
+    def __len__(self):
+        return len(self.image_list)
+
+    def __getitem__(self, idx):
+        # img_name = os.path.join(self.root_dir,
+        #                         self.landmarks_frame.iloc[idx, 0])
+        image_name = self.image_list[idx]
+
+        
+        image = Image.open(image_name)
+        # landmarks = self.landmarks_frame.iloc[idx, 1:].as_matrix()
+        # landmarks = landmarks.astype('float').reshape(-1, 2)
+
+        sample = image
+        label = image_name.split('/')[5]
+        if self.transform:
+            sample = self.transform(sample)
+        if self.classes:    
+            label = self.classes[label]
+        
+
+        sample = (sample,label)
+
+        return sample
+
+class TrainDataset(Dataset):
+    def __init__(self,list_file,classes,classes = None,transform=None):
+        """
+        Args:
+            csv_file (string): Path to the csv file with annotations.
+            root_dir (string): Directory with all the images.
+            transform (callable, optional): Optional transform to be applied
+                on a sample.
+        """
+#         self.landmarks_frame = pd.read_csv(csv_file)
+#         self.root_dir = root_dir
+        self.transform = transform
+#         self.transform_v2 = transform_v2
+        self.list_file = list_file
+        self.image_list = open(list_file).read().splitlines()
+        self.classes = classes
+
+    def __len__(self):
+        return len(self.image_list)
+
+    def __getitem__(self, idx):
+        # img_name = os.path.join(self.root_dir,
+        #                         self.landmarks_frame.iloc[idx, 0])
+        image_name = self.image_list[idx]
+
+        
+        image = Image.open(image_name)
+        # landmarks = self.landmarks_frame.iloc[idx, 1:].as_matrix()
+        # landmarks = landmarks.astype('float').reshape(-1, 2)
+
+        sample = image.convert('RGB')
+        label = image_name.split('_')[4]
+        if self.transform:
+            sample = self.transform(sample)
+        if self.classes:
+            label = self.classes[label]
+        
+
+        sample = (sample,label)
+
+        return sample
 
 
 def initialize_model(model_name, num_classes, feature_extract, use_pretrained=True):
