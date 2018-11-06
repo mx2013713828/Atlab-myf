@@ -6,7 +6,7 @@ import numpy as np
 from skimage import io, transform
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
-
+from PIL import Image
 def eval_model(model,dataloader,class_names = ['pulp','sexy','normal']):
 
     model.eval()
@@ -123,7 +123,7 @@ class TrainDataset(Dataset):
         label = image_name.split('/')[5]
         if self.transform:
             sample = self.transform(sample)
-        if self.classes:    
+        if self.classes:
             label = self.classes[label]
         
 
@@ -131,7 +131,7 @@ class TrainDataset(Dataset):
 
         return sample
 
-class TrainDataset(Dataset):
+class ValDataset(Dataset):
     def __init__(self,list_file,classes,classes = None,transform=None):
         """
         Args:
@@ -162,7 +162,7 @@ class TrainDataset(Dataset):
         # landmarks = landmarks.astype('float').reshape(-1, 2)
 
         sample = image.convert('RGB')
-        label = image_name.split('_')[4]
+        label = image_name.split('_')[1]
         if self.transform:
             sample = self.transform(sample)
         if self.classes:
