@@ -71,9 +71,9 @@ def main():
     # Create training and validation datasets
     #image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
     image_datasets = {}
-    image_datasets ['train'] = TrainDataset(list_file = 'blademaster-train.lst',classes = classes,transform=data_transforms['train'])
+    image_datasets ['train'] = TrainDataset(list_file = 'blademaster-train.lst',transform=data_transforms['train'])
 
-    image_datasets ['val'] =TrainDataset(list_file = 'blade-val.lst',classes = classes,transform = data_transforms['val'])
+    image_datasets ['val'] =TrainDataset(list_file = 'blade-val.lst',transform = data_transforms['val'])
     # Create training and validation dataloaders
     dataloaders_dict = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=True, num_workers=0) for x in ['train', 'val']}
 

@@ -7,8 +7,8 @@ Train:
     batch_size: das
     feature_extract: True
     savePath: 'model/resnet-18'
-    lr: 
-    momentum: 
+    lr: 0.01
+    momentum: 0.9
     mean: [0.485, 0.456, 0.406] 
     std: [0.229, 0.224, 0.225]
 #    loadPt : 

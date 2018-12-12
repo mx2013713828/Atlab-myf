@@ -13,6 +13,8 @@ def calculate_cls_acc(dir_name, lib_dict, pass_score=0.9):
     for json_file in os.listdir(dir_name):
         if not json_file.endswith('.json'):
             continue
+        if json_file.endswith('-error.json'):
+            continue
         filename = os.path.join(dir_name, json_file)
         correct_sand_num, all_sand_num = 0.0, 0.0
         error_sand = []

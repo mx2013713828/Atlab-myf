@@ -10,32 +10,30 @@ from PIL import Image
 import pretrainedmodels
 import pretrainedmodels.utils as utils
 
-def eval_model(model,dataloader,class_names = ['pulp','sexy','normal']):
+def eval_model(model,testloader,class_names = ['pulp','sexy','normal']):
 
     model.eval()
-
-
-
     with torch.no_grad():
         results = {}
-        for i,inputs in enumerate(dataloader):
-            inputs,image_names = inputs.to(device)
+        for inputs,image_names in testloader:
+            inputs = inputs.to(device)
             # labels = labels.to(device)
 
             outputs = model(inputs)
+            scores = nn.Softmax(dim=1)(outputs)
             _, preds = torch.max(outputs, 1)
             #write inference log to json file
 
             Confidences = []
             for j in range(inputs.size()[0]):
                 result = {}
-                predict_scores = outputs[j]
+                predict_scores = scores[j]
                 image_name = image_names[j]
 
-                result['Top-1 index'] = preds[j]
+                result['Top-1 index'] = int(preds[j])
                 result['Class'] =class_names[preds[j]]
                 for m in range(len(class_names)):
-                    Confidences.append(predict_scores[m])
+                    Confidences.append(float(predict_scores[m]))
                 result['Confidences'] = Confidences
                 results[image_name] = result
                 
@@ -90,7 +88,8 @@ class TestDataset(Dataset):
             sample = self.transform(sample)
         sample = (sample,image_name)
 
-        return sample
+
+        return (sample,image_name)
 
 class TrainDataset(Dataset):
     def __init__(self,list_file,classes=None,transform=None):
@@ -117,16 +116,16 @@ class TrainDataset(Dataset):
         #                         self.landmarks_frame.iloc[idx, 0])
         try:
             image_name = self.image_list[idx]
-            image = Image.open(image_name)
+            image = Image.open(image_name.split(' ')[0])
         except:
             image_name = self.image_list[idx+1]
-            image = Image.open(image_name)
+            image = Image.open(image_name.split(' ')[0])
         
         # landmarks = self.landmarks_frame.iloc[idx, 1:].as_matrix()
         # landmarks = landmarks.astype('float').reshape(-1, 2)
 
         sample = image.convert('RGB')
-        label = image_name.split('/')[5]
+        label = int(image_name.split(' ')[1])
         if self.transform:
             sample = self.transform(sample)
         if self.classes:
@@ -138,7 +137,7 @@ class TrainDataset(Dataset):
         return sample
 
 class ValDataset(Dataset):
-    def __init__(self,list_file,classes,classes = None,transform=None):
+    def __init__(self,list_file,classes = None,transform=None):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -164,16 +163,16 @@ class ValDataset(Dataset):
         try:
 
             image_name = self.image_list[idx]
-            image = Image.open(image_name)
+            image = Image.open(image_name.split(' ')[0])
         except:
             image_name = self.image_list[idx+1]
-            image = Image.open(image_name)
+            image = Image.open(image_name.split(' ')[0])
         
         # landmarks = self.landmarks_frame.iloc[idx, 1:].as_matrix()
         # landmarks = landmarks.astype('float').reshape(-1, 2)
 
         sample = image.convert('RGB')
-        label = image_name.split('_')[1]
+        label = int(image_name.split(' ')[1])
         if self.transform:
             sample = self.transform(sample)
         if self.classes:

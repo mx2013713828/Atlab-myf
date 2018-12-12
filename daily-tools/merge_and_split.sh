@@ -9,7 +9,7 @@ sh split_date.sh $output $label
 
 qshell account 
 
-for file in `ls $label/`
+for file in `ls ./$label/`
 do
-    qshell fput qpulp-annotations $file $label/$file;
+    qshell fput myf666 $label/$file $label/$file;
 done

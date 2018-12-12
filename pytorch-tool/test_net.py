@@ -1,7 +1,20 @@
-from util import TestDataset,initialize_model,eval_model
-from torchvision import transforms, utils
-import os,json,argparse
-
+#coding:utf-8
+#test method for some pytorch net
+from __future__ import print_function
+from __future__ import division
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import numpy as np
+import torchvision
+from util import TrainDataset,ValDataset,train_model,initialize_model,set_parameter_requires_grad
+from torchvision import datasets, models, transforms
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+import matplotlib.pyplot as plt
+import time
+import os,yaml,argparse
+import copy
 parser = argparse.ArgumentParser()
 
 parser.add_argument('list_file', type=str, help='list of test images')
@@ -20,10 +33,15 @@ transform=transforms.Compose([
 
 testset = TestDataset(list_file=list_file,
                       transform=transforms)
-
+model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=False)
 testloader = DataLoader(testset, batch_size=64,
                         shuffle=True, num_workers=0)
-
+if cfgs['loadPt']:
+    checkpoint = torch.load(cfgs['loadPt'])
+    state_dict = {}
+    for key in checkpoint['model_state_dict'].keys():
+        state_dict[key[7:]]=checkpoint['model_state_dict'][key]
+    model_ft.load_state_dict(state_dict)
 
 # model_name= 'densenet'
 feature_extract = False
