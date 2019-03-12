@@ -1,0 +1,16 @@
+Test:
+    testFile : "/workspace/mnt/group/general-reg/mayufeng/myf/dataset/blademaster_20180204.lst"
+    saveFile : "/workspace/mnt/group/general-reg/mayufeng/github/Atlab-myf/pytorch-tool/logs/test_dense201_blade_src_30.json"
+    epoch : 
+    model_name : densenet
+    num_classes: 3
+    batch_size: 512
+    feature_extract: False
+    savePath: 
+    lr: 0.01 
+    momentum: 0.9 
+    mean: [0.485, 0.456, 0.406] 
+    std: [0.229, 0.224, 0.225]
+    loadPt: "/workspace/mnt/group/general-reg/mayufeng/github/Atlab-myf/pytorch-tool/model/densenet/dense201-40.pt"
+    start_epoch: 0 
+    pretrain : False

@@ -12,6 +12,7 @@ from torchvision import datasets, models, transforms
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 import matplotlib.pyplot as plt
+from torch.optim.lr_scheduler import *
 import time
 import os,yaml,argparse
 import copy
@@ -38,22 +39,31 @@ def main():
     cfgs = cfgs['Train']
     model_name= cfgs['model_name']
     feature_extract = cfgs['feature_extract']
-    model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=True)
-    if cfgs['loadPt']:
+    num_classes = cfgs['num_classes']
+    batch_size = cfgs['batch_size']
+    pretrained = cfgs['pretrain']
+    model_ft, input_size = initialize_model(model_name, num_classes, feature_extract, use_pretrained=pretrained)
+    start_epoch = cfgs['start_epoch']
+    if cfgs['loadPt']!= None:
+        print('load pre model')
         checkpoint = torch.load(cfgs['loadPt'])
         state_dict = {}
         for key in checkpoint['model_state_dict'].keys():
             state_dict[key[7:]]=checkpoint['model_state_dict'][key]
         model_ft.load_state_dict(state_dict)
         start_epoch = checkpoint['epoch']
+    print('start_epoch',start_epoch)
     print(model_ft)
+
 
 
     # Data augmentation and normalization for training
     # Just normalization for validation
     data_transforms = {
         'train': transforms.Compose([
-            transforms.RandomResizedCrop(input_size),
+#             transforms.RandomResizedCrop(input_size),
+            transforms.Resize(256),
+            transforms.RandomCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize(cfgs['mean'], cfgs['std'])
@@ -71,11 +81,11 @@ def main():
     # Create training and validation datasets
     #image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x]) for x in ['train', 'val']}
     image_datasets = {}
-    image_datasets ['train'] = TrainDataset(list_file = 'blademaster-train.lst',transform=data_transforms['train'])
+    image_datasets ['train'] = TrainDataset(list_file = cfgs['trainFile'],transform=data_transforms['train'])
 
-    image_datasets ['val'] =TrainDataset(list_file = 'blade-val.lst',transform = data_transforms['val'])
+    image_datasets ['val'] =TrainDataset(list_file = cfgs['valFile'],transform = data_transforms['val'])
     # Create training and validation dataloaders
-    dataloaders_dict = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=True, num_workers=0) for x in ['train', 'val']}
+    dataloaders_dict = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=True, num_workers=12) for x in ['train', 'val']}
 
     # Detect if we have a GPU available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -108,15 +118,21 @@ def main():
                 print("\t",name)
 
     # Observe that all parameters are being optimized
-    optimizer_ft = optim.SGD(params_to_update, lr=cfgs['lr'], momentum=cfgs['momentum'])
+    if cfgs['optim']=='sgd':
+        optimizer_ft = optim.SGD(params_to_update, lr=cfgs['lr'], momentum=cfgs['momentum'])
+    elif cfgs['optim'] == 'adam':
+        optimizer_ft = optim.Adam(params=params_to_update, lr=cfgs['lr'], betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
 
 
     # Setup the loss fxn
     criterion = nn.CrossEntropyLoss()
-
+    
+    
+    #scheduler
+#     scheduler = MultiStepLR(optimizer_ft,milestones = [10,40])
     # Train and evaluate
-    model_ft, hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft,start_epoch=cfgs['start_epoch'], num_epochs =cfgs['epoch'], is_inception=(model_name=="inception"))
-
+    model_ft, hist = train_model(model_ft, dataloaders_dict, criterion, optimizer_ft,start_epoch=start_epoch,savePath =cfgs['savePath'], num_epochs =cfgs['epoch'], is_inception=(model_name=="inception"),device=device)
+    print(hist)
     torch.save({
                 'epoch': hist.index(max(hist))+1,
                 'model_state_dict': model_ft.state_dict(),

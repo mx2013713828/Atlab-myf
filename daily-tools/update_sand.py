@@ -12,7 +12,9 @@ def _init_():
 
     
 def main():
+    num = 0
     args = _init_()
+    print(args)
     allsands = {}
     with open(args.oldsand) as f:
         for line in f:
@@ -22,13 +24,30 @@ def main():
             allsands[url] = label
     for root,_,files in os.walk(args.newsand):
         for file in files:
+            print(file)
             newsand = os.path.join(root,file)
+            if newsand.endswith('.DS_Store'):
+                continue
             with open(newsand) as f:
                 for line in f:
                     js = json.loads(line.strip())
                     url = js['url']
-                    label = js['label'][0]['data'][0]['class']
+                    try:
+                        if len(js['label'][0]['data']) ==2:
+                            label = js['label'][0]['data'][1]['class']
+                        else:
+                            label = js['label'][0]['data'][0]['class']
+                    except:
+                        print(js)
+
+                    try:
+                        if label!=allsands[url]:
+                            num+=1
+                    except:
+                        num+=1
+                    
                     allsands[url] = label
+                print('num',num)
     with open(args.oldsand,'w') as f:
         for key in allsands:
             label = allsands[key]
@@ -37,4 +56,5 @@ def main():
 
 
 if __name__ == "__main__":
+    print('---start----')
     main()

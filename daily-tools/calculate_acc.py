@@ -15,12 +15,17 @@ def calculate_cls_acc(dir_name, lib_dict, pass_score=0.9):
             continue
         if json_file.endswith('-error.json'):
             continue
+        if json_file.endswith('-sands.json'):
+            continue
         filename = os.path.join(dir_name, json_file)
         correct_sand_num, all_sand_num = 0.0, 0.0
         error_sand = []
+        all_sands = []
         with open(filename, 'r') as f:
             error_file = json_file.split('.')[0]+'-error'+'.json'
+            sand_file = json_file.split('.')[0]+'-sands'+'.json'
             errorfile = os.path.join(dir_name,error_file)
+            sandsfile = os.path.join(dir_name,sand_file)
             
             for line in f:
                 img_info = json.loads(line.strip())
@@ -35,14 +40,20 @@ def calculate_cls_acc(dir_name, lib_dict, pass_score=0.9):
                     if lib_dict[img_name] == label:
                         # print(lib_dict[img_name],label)
                         correct_sand_num = correct_sand_num + 1
+                        line = '{"url":"%s","type":"image","label":[{"name":"general","type":"classification","version":"1","data":[{"class":"%s"},{"class":"%s"}]}]}\n'%(img_info['url'], label,lib_dict[img_name])
+                        
                     else:
                         img_info["label"][0]["data"].append({'"class"':lib_dict[img_name]})
                         line = '{"url":"%s","type":"image","label":[{"name":"general","type":"classification","version":"1","data":[{"class":"%s"},{"class":"%s"}]}]}\n'%(img_info['url'], label,lib_dict[img_name])
 
                         error_sand.append(line)
-        print(all_sand_num)
+                    all_sands.append(line)
+        # print(all_sand_num)
         with open(errorfile,'w') as f:
             for line in error_sand:
+                f.write(line)
+        with open(sandsfile,'w') as f:
+            for line in all_sands:
                 f.write(line)
         if all_sand_num == 0.0:
             acc = 0.0
