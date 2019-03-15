@@ -65,7 +65,7 @@ for row in set_b:
         pass
 print('benefit dataset num:',len(diff_same))
 
-with open(args.output+'.json','w') as f:
+with open(args.output+'_benefit.json','w') as f:
     for row in diff_same:
         f.write(row+'\n')
 

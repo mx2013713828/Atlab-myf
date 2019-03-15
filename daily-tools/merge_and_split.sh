@@ -13,3 +13,5 @@ for file in `ls ./$label/`
 do
     qshell fput myf666 $label/$file $label/$file;
 done
+
+
